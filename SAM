@@ -76,22 +76,17 @@ encoded_dim = 2048
 # BATCH_SIZE=1024*4
 BATCH_SIZE = 1024 // 4
 a = np.loadtxt('gtruth.csv',delimiter=',')
-index0 = np.argwhere(a == 0)[:5217]
-index1 = np.argwhere(a == 1)[:5217]
-index2 = np.argwhere(a == 2)[:5217]
-index3 = np.argwhere(a == 3)[:5217]
-
-a=np.concatenate((a[index0],a[index1],a[index2],a[index3]))
 print(a.shape)
 mat = h5py.File('/home/jyh/anaconda3/Pos1M2.mat')
 data = np.transpose(mat['Hdata1'])  # shape=(320000, 1024)
 data = data.astype('float32')
-data = data.reshape(-1,2*32*32)
-data=torch.tensor(data)
-data=torch.cat((data[index0,:],data[index1,:],data[index2,:],data[index3,:]),0).squeeze(dim=1)
+data=data-0.5
+data = np.reshape(data, [len(data), img_channels, img_height, img_width])
+# split data for training(70%) and validation(30%)
+np.random.shuffle(data)
+start = floor(len(data)*0.7)
+train, test = data[start:,:,:,:], data[:start,:,:,:]
 
-print(data.shape)
-train, test = data, data
 l=len(train)
 b=torch.tensor(a)
 torch_dataset = Data.TensorDataset(train, b)
