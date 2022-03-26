@@ -1,5 +1,5 @@
 import os
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  #（保证程序cuda序号与实际cuda序号对应）
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" 
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 import torch
 import torch.nn as nn
@@ -22,20 +22,19 @@ img_channels = 2
 img_total = img_height * img_width * img_channels
 
 residual_num = 2
-encoded_dim = 2048  # compress rate=1/4->dim.=512, compress rate=1/16->dim.=128, compress rate=1/32->dim.=64, compress rate=1/64->dim.=32
+encoded_dim = 2048  
 
 mat = h5py.File('/home/jyh/anaconda3/Pos1M2.mat')
-data = np.transpose(mat['Hdata1'])  # shape=(320000, 1024)
+data = np.transpose(mat['Hdata1']) 
 data = data.astype('float32')
 data = data+0.5
-# data = np.reshape(data, [len(data), img_channels, img_height, img_width])
+data = np.reshape(data, [len(data), img_channels, img_height, img_width])
 # split data for training(70%) and validation(30%)
-# np.random.shuffle(data)
-# start = 0
-# train, test = data[start:,:,:,:], data[start:,:,:,:]
-train,test=data,data
+np.random.shuffle(data)
+start = floor(len(data)*0.7)
+train, test = data[start:,:,:,:], data[:start,:,:,:]
 
-# BATCH_SIZE=1024*4
+
 BATCH_SIZE = 1024 // 4
 from torch.utils.data import Dataset
 
@@ -47,16 +46,16 @@ torch_dataset = Data.TensorDataset(train, train)
 trainloader = Data.DataLoader(
     dataset=torch_dataset,
     batch_size=BATCH_SIZE,
-    shuffle=True,  # shuffle的英文含义是洗牌，=true意味着每回顺序是打乱的
-    num_workers=0,  # 2个“工人”
+    shuffle=True,  
+    num_workers=0,  
     drop_last=True
 )
 torch_dataset = Data.TensorDataset(test, test)
 testloader = Data.DataLoader(
     dataset=torch_dataset,
     batch_size=BATCH_SIZE,
-    shuffle=False,  # shuffle的英文含义是洗牌，=true意味着每回顺序是打乱的
-    num_workers=0,  # 2个“工人”
+    shuffle=False,  
+    num_workers=0, 
     drop_last=True
 )
 
